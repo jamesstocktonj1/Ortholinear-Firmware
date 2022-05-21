@@ -17,6 +17,8 @@ void init_pins(void);
 uint16_t read_columns(uint8_t rowIndex);
 uint8_t read_keys(void);
 
+void write_leds(void);
+
 void print_keys(void);
 
 
@@ -25,6 +27,10 @@ void print_keys(void);
 uint16_t key_status[4] = {0, };
 uint16_t key_previous[4] = {0, };
 uint16_t key_diff[4] = {0, };
+
+// led status arrays
+bool writeLeds = false;
+uint16_t led_state[4] = {0, };
 
 
 
@@ -44,10 +50,17 @@ void loop() {
 
 // Running on core1
 void setup1() {
-  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop1() {
+
+  if(writeLeds) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    write_leds();
+    digitalWrite(LED_BUILTIN, LOW);
+  }
+
+
   digitalWrite(LED_BUILTIN, HIGH);
   delay(200);
 
@@ -138,12 +151,55 @@ void print_keys() {
     for(int j=0; j<12; j++) {
 
       if(key_status[i] & key_diff[i] & (1 << j)) {
+
+        // log button presses
         Serial.print("Button Pressed: row ");
         Serial.print(i);
         Serial.print(" columns ");
         Serial.print(j);
         Serial.print("\n");
       }
+
+      // log button release
+      if(!(key_status[i] & key_diff[i] & (1 << j))) {
+
+        // log button presses
+        Serial.print("Button Released: row ");
+        Serial.print(i);
+        Serial.print(" columns ");
+        Serial.print(j);
+        Serial.print("\n");
+      }
     }
+  }
+}
+
+
+void write_leds() {
+
+  // itterate through rows
+  for(int i=0; i<4; i++) {
+
+    // set row values (all 1 except rowIndex)
+    for(int k=0; k<4; k++) {
+      digitalWrite(rows[k], k!=i);
+    }
+
+    // itterate through columns
+    for(int j=0; j<10; j++) {
+
+      digitalWrite(led_columns[i], led_state[i] & (1 << j));
+    }
+
+    delay(LED_WAIT_TIME);
+  }
+
+  // reset pin states
+  for(int i=0; i<4; i++) {
+    digitalWrite(rows[i], HIGH);
+  }
+
+  for(int j=0; j<10; j++) {
+    digitalWrite(led_columns[j], LOW);
   }
 }
