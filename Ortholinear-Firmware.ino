@@ -33,7 +33,7 @@ bool writeLeds = false;
 uint16_t led_state[4] = {0, };
 
 
-
+// core 0 functions
 void setup() {
   
   init_pins();
@@ -48,9 +48,9 @@ void loop() {
   delay(20);
 }
 
+// core 1 functions
 void setup1() {}
 
-// core 1 loop
 void loop1() {
 
   if(writeLeds) {
@@ -66,6 +66,7 @@ void loop1() {
   digitalWrite(LED_BUILTIN, LOW);
   delay(800);
 }
+
 
 void init_pins() {
 
