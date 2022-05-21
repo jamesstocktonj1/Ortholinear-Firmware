@@ -3,6 +3,10 @@
 // 19/05/2022
 
 
+// multiplexing timings
+#define LED_WAIT_TIME 10
+
+
 // multiplexing rows
 #define ROW0 0
 #define ROW1 1
