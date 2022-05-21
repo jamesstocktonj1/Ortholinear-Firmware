@@ -16,11 +16,11 @@ Adafruit_USBD_HID usb_hid(desc_hid_report, sizeof(desc_hid_report), HID_ITF_PROT
 void init_pins(void);
 uint16_t read_columns(uint8_t rowIndex);
 uint8_t read_keys(void);
-
-void write_leds(void);
-
 void print_keys(void);
 
+// keyboard led functions
+void set_led_states(void);
+void write_leds(void);
 
 
 // key status arrays
@@ -48,10 +48,9 @@ void loop() {
   delay(20);
 }
 
-// Running on core1
-void setup1() {
-}
+void setup1() {}
 
+// core 1 loop
 void loop1() {
 
   if(writeLeds) {
@@ -139,6 +138,9 @@ uint8_t read_keys() {
     delay(2);
   }
 
+  // update led array
+  set_led_states();
+
   return change;
 }
 
@@ -201,5 +203,15 @@ void write_leds() {
 
   for(int j=0; j<10; j++) {
     digitalWrite(led_columns[j], LOW);
+  }
+}
+
+
+void set_led_states() {
+
+  // itterate through rows
+  for(int i=0; i<4; i++) {
+
+    led_state[i] = key_status[i];
   }
 }
