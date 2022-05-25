@@ -16,9 +16,11 @@ Adafruit_USBD_HID usb_hid(desc_hid_report, sizeof(desc_hid_report), HID_ITF_PROT
 void init_pins(void);
 uint16_t read_columns(uint8_t rowIndex);
 uint8_t read_keys(void);
-
 void print_keys(void);
 
+// keyboard led functions
+void set_led_states(void);
+void write_leds(void);
 
 
 // key status arrays
@@ -26,8 +28,12 @@ uint16_t key_status[4] = {0, };
 uint16_t key_previous[4] = {0, };
 uint16_t key_diff[4] = {0, };
 
+// led status arrays
+bool writeLeds = false;
+uint16_t led_state[4] = {0, };
 
 
+// core 0 functions
 void setup() {
   
   init_pins();
@@ -42,18 +48,25 @@ void loop() {
   delay(20);
 }
 
-// Running on core1
-void setup1() {
-  pinMode(LED_BUILTIN, OUTPUT);
-}
+// core 1 functions
+void setup1() {}
 
 void loop1() {
+
+  if(writeLeds) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    write_leds();
+    digitalWrite(LED_BUILTIN, LOW);
+  }
+
+
   digitalWrite(LED_BUILTIN, HIGH);
   delay(200);
 
   digitalWrite(LED_BUILTIN, LOW);
   delay(800);
 }
+
 
 void init_pins() {
 
@@ -126,6 +139,9 @@ uint8_t read_keys() {
     delay(2);
   }
 
+  // update led array
+  set_led_states();
+
   return change;
 }
 
@@ -138,12 +154,65 @@ void print_keys() {
     for(int j=0; j<12; j++) {
 
       if(key_status[i] & key_diff[i] & (1 << j)) {
+
+        // log button presses
         Serial.print("Button Pressed: row ");
         Serial.print(i);
         Serial.print(" columns ");
         Serial.print(j);
         Serial.print("\n");
       }
+
+      // log button release
+      if(!(key_status[i] & key_diff[i] & (1 << j))) {
+
+        // log button presses
+        Serial.print("Button Released: row ");
+        Serial.print(i);
+        Serial.print(" columns ");
+        Serial.print(j);
+        Serial.print("\n");
+      }
     }
+  }
+}
+
+
+void write_leds() {
+
+  // itterate through rows
+  for(int i=0; i<4; i++) {
+
+    // set row values (all 1 except rowIndex)
+    for(int k=0; k<4; k++) {
+      digitalWrite(rows[k], k!=i);
+    }
+
+    // itterate through columns
+    for(int j=0; j<10; j++) {
+
+      digitalWrite(led_columns[i], led_state[i] & (1 << j));
+    }
+
+    delay(LED_WAIT_TIME);
+  }
+
+  // reset pin states
+  for(int i=0; i<4; i++) {
+    digitalWrite(rows[i], HIGH);
+  }
+
+  for(int j=0; j<10; j++) {
+    digitalWrite(led_columns[j], LOW);
+  }
+}
+
+
+void set_led_states() {
+
+  // itterate through rows
+  for(int i=0; i<4; i++) {
+
+    led_state[i] = key_status[i];
   }
 }
