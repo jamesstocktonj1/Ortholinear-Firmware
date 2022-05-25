@@ -35,8 +35,17 @@ uint16_t led_state[4] = {0, };
 
 // core 0 functions
 void setup() {
-  
+
+  // set usb descriptors
+  TinyUSBDevice.setProductDescriptor("Ortholinear Keyboard");
+  TinyUSBDevice.setManufacturerDescriptor("JStockton");
+
+  // setup usb and pins
+  usb_hid.begin();
   init_pins();
+
+  // wait for usb connection
+  while(!TinyUSBDevice.mounted()) delay(1);
 }
 
 void loop() {
