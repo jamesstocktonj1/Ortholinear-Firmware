@@ -1,6 +1,6 @@
 #include "Adafruit_TinyUSB.h"
 #include "pins.h"
-//#include "keys.h"
+#include "keys.h"
 
 
 // usb hid setup
@@ -22,7 +22,6 @@ void print_keys(void);
 void set_led_states(void);
 void write_leds(void);
 
-
 // key status arrays
 uint16_t key_status[4] = {0, };
 uint16_t key_previous[4] = {0, };
@@ -33,12 +32,20 @@ bool writeLeds = false;
 uint16_t led_state[4] = {0, };
 
 
+// keyboard special key functions
+void copy_func(void);
+void paste_func(void);
+
+
 // core 0 functions
 void setup() {
 
   // set usb descriptors
   TinyUSBDevice.setProductDescriptor("Ortholinear Keyboard");
   TinyUSBDevice.setManufacturerDescriptor("JStockton");
+
+  // set usb id values (vid, pid)
+  //TinyUSBDevice.setID(0x16c0, 0x27db);
 
   // setup usb and pins
   usb_hid.begin();
@@ -49,12 +56,33 @@ void setup() {
 }
 
 void loop() {
-  
+
+  /*
   if(read_keys()) {
     print_keys();
   }
   
-  delay(20);
+  delay(20);*/
+  USR_KEY_FUNC_0();
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(200);
+
+  usb_hid.keyboardRelease(0x00);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(800);
+
+  delay(2000);
+
+
+  USR_KEY_FUNC_1();
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(200);
+
+  usb_hid.keyboardRelease(0x00);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(800);
+
+  delay(2000);
 }
 
 // core 1 functions
@@ -67,17 +95,33 @@ void loop1() {
     write_leds();
     digitalWrite(LED_BUILTIN, LOW);
   }
-
-
+  /*
+  copy_func();
   digitalWrite(LED_BUILTIN, HIGH);
   delay(200);
 
+  usb_hid.keyboardRelease(0x00);
   digitalWrite(LED_BUILTIN, LOW);
   delay(800);
+
+  delay(2000);
+
+
+  paste_func();
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(200);
+
+  usb_hid.keyboardRelease(0x00);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(800);
+
+  delay(2000);*/
 }
 
 
 void init_pins() {
+
+  pinMode(LED_BUILTIN, OUTPUT);
 
   // itterate through rows
   for(int i=0; i<4; i++) {
@@ -224,4 +268,26 @@ void set_led_states() {
 
     led_state[i] = key_status[i];
   }
+}
+
+
+
+void copy_func(void) {
+
+  // control modifier (bit 4) + c
+  uint8_t modifier = (1 << 4);
+  uint8_t keys[1] = {HID_KEY_C};
+
+  // send report: id 0
+  usb_hid.keyboardReport(0x00, modifier, keys);
+}
+
+void paste_func(void) {
+
+  // control modifier (bit 4) + c
+  uint8_t modifier = (1 << 4);
+  uint8_t keys[1] = {HID_KEY_V};
+
+  // send report: id 0
+  usb_hid.keyboardReport(0x00, modifier, keys);
 }
