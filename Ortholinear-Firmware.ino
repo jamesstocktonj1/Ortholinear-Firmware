@@ -23,6 +23,7 @@ Adafruit_USBD_HID usb_hid(desc_hid_report, sizeof(desc_hid_report), HID_ITF_PROT
 void init_pins(void);
 uint16_t read_columns(uint8_t rowIndex);
 uint8_t read_keys(void);
+void send_keys(void);
 void print_keys(void);
 
 // keyboard led functions
@@ -241,6 +242,62 @@ void print_keys() {
         Serial.print(" columns ");
         Serial.print(j);
         Serial.print("\n");
+      }
+    }
+  }
+}
+
+void send_keys() {
+
+  uint8_t modifierState = 0x00;
+  uint8_t shouldRelease = 0;
+
+  // itterate through rows
+  for(int i=0; i<4; i++) {
+
+    // itterate through columns
+    for(int j=0; j<12; j++) {
+
+      // check for key change
+      if(key_status[i] & (1 << j)) {
+
+        // log button press
+        Serial.print("Button ");
+        Serial.print((key_status[i] & (1 << j)) ? "Press" : "Release");
+        Serial.print(": ");
+        Serial.print(i);
+        Serial.print(", ");
+        Serial.print(j);
+        Serial.print("\n");
+
+        uint8_t buttonCode = primaryLayer[i][j];
+        uint8_t buttonState = (key_status[i] & (1 << j));
+        switch(buttonCode) {
+
+          //user key press
+          case USR_KEY_0:
+            USR_KEY_FUNC_0(buttonState);
+            break;
+          case USR_KEY_1:
+            USR_KEY_FUNC_1(buttonState);
+            break;
+          case USR_KEY_2:
+            USR_KEY_FUNC_2(buttonState);
+            break;
+          case USR_KEY_3:
+            USR_KEY_FUNC_3(buttonState);
+            break;
+          case USR_KEY_4:
+            USR_KEY_FUNC_4(buttonState);
+            break;
+          case USR_KEY_5:
+            USR_KEY_FUNC_5(buttonState);
+            break;
+        }
+
+        if(!buttonState) {
+          release_keys();
+        }
       }
     }
   }
