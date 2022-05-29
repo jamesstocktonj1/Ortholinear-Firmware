@@ -75,32 +75,12 @@ void setup() {
 
 void loop() {
 
-  /*
   if(read_keys()) {
-    print_keys();
+    //print_keys();
+    send_keys();
   }
   
-  delay(20);*/
-  USR_KEY_FUNC_0(1);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-
-  usb_hid.keyboardRelease(0x00);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(800);
-
-  delay(2000);
-
-
-  USR_KEY_FUNC_1(1);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-
-  usb_hid.keyboardRelease(0x00);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(800);
-
-  delay(2000);
+  delay(20);
 }
 
 // core 1 functions
@@ -108,11 +88,13 @@ void setup1() {}
 
 void loop1() {
 
+  /*
   if(writeLeds) {
     digitalWrite(LED_BUILTIN, HIGH);
     write_leds();
     digitalWrite(LED_BUILTIN, LOW);
   }
+  */
   /*
   copy_func();
   digitalWrite(LED_BUILTIN, HIGH);
@@ -203,7 +185,7 @@ uint8_t read_keys() {
     key_diff[i] = temp ^ key_previous[i];
 
     // set change flag
-    if(temp) {
+    if(key_diff[i]) {
       change = 1;
     }
 
@@ -264,19 +246,27 @@ void send_keys() {
     for(int j=0; j<12; j++) {
 
       // check for key change
-      if(key_status[i] & (1 << j)) {
+      if(key_diff[i] & (1 << j)) {
+        
+        uint8_t buttonCode = primaryLayer[i][j];
+        uint8_t buttonState = (key_status[i] & (1 << j));
 
         // log button press
         Serial.print("Button ");
-        Serial.print((key_status[i] & (1 << j)) ? "Press" : "Release");
+        if(buttonState) {
+          Serial.print("Press");
+        }
+        else {
+          Serial.print("Release");
+        }
         Serial.print(": ");
         Serial.print(i);
         Serial.print(", ");
         Serial.print(j);
         Serial.print("\n");
 
-        uint8_t buttonCode = primaryLayer[i][j];
-        uint8_t buttonState = (key_status[i] & (1 << j));
+        
+        
         switch(buttonCode) {
 
           // user key press
@@ -333,14 +323,15 @@ void send_keys() {
         // handle button release
         if(!buttonState) {
           shouldRelease = 1;
-        }
-        
-        // send key report if item added to array or modifier change
-        if((sendKeyPos != 0) || modifierState) {
-          usb_hid.keyboardReport(0, modifierState, sendKeys);
+          //release_keys();
         }
       }
     }
+  }
+  
+  // send key report if item added to array or modifier change
+  if((sendKeyPos != 0) || modifierState) {
+    usb_hid.keyboardReport(0, modifierState, sendKeys);
   }
 
   // handle button release
