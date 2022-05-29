@@ -3,6 +3,13 @@
 #include "keys.h"
 
 
+// keyboard setup constants
+#define PRODUCT_DESCRIPTOR "Ortholinear Keyboard"
+#define MANUFACTURER_DESCRIPTOR "JStockton"
+//#define KEYBOARD_PID 0x0000
+//#define KEYBOARD_VID 0X0000
+
+
 // usb hid setup
 void hid_report_callback(uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize);
 uint8_t const desc_hid_report[] = {
@@ -33,19 +40,28 @@ uint16_t led_state[4] = {0, };
 
 
 // keyboard special key functions
-void copy_func(void);
-void paste_func(void);
+void copy_func(uint8_t state);
+void paste_func(uint8_t state);
 
 
 // core 0 functions
 void setup() {
 
   // set usb descriptors
-  TinyUSBDevice.setProductDescriptor("Ortholinear Keyboard");
+  // product descriptor
+  #ifdef PRODUCT_DESCRIPTOR
+  TinyUSBDevice.setProductDescriptor(PRODUCT_DESCRIPTOR);
+  #endif
+
+  // manufacturer descriptor
+  #ifdef MANUFACTURER_DESCRIPTOR
   TinyUSBDevice.setManufacturerDescriptor("JStockton");
+  #endif
 
   // set usb id values (vid, pid)
-  //TinyUSBDevice.setID(0x16c0, 0x27db);
+  #ifdef KEYBOARD_VID && KEYBOARD_PID
+  TinyUSBDevice.setID(KEYBOARD_VID, KEYBOARD_PID);
+  #endif
 
   // setup usb and pins
   usb_hid.begin();
@@ -63,7 +79,7 @@ void loop() {
   }
   
   delay(20);*/
-  USR_KEY_FUNC_0();
+  USR_KEY_FUNC_0(1);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(200);
 
@@ -74,7 +90,7 @@ void loop() {
   delay(2000);
 
 
-  USR_KEY_FUNC_1();
+  USR_KEY_FUNC_1(1);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(200);
 
@@ -272,22 +288,26 @@ void set_led_states() {
 
 
 
-void copy_func(void) {
+void copy_func(uint8_t state) {
 
-  // control modifier (bit 4) + c
-  uint8_t modifier = (1 << 4);
-  uint8_t keys[1] = {HID_KEY_C};
+  if(state) {
+    // control modifier (bit 4) + c
+    uint8_t modifier = (1 << 4);
+    uint8_t keys[1] = {HID_KEY_C};
 
-  // send report: id 0
-  usb_hid.keyboardReport(0x00, modifier, keys);
+    // send report: id 0
+    usb_hid.keyboardReport(0x00, modifier, keys);
+  }
 }
 
-void paste_func(void) {
+void paste_func(uint8_t state) {
 
-  // control modifier (bit 4) + c
-  uint8_t modifier = (1 << 4);
-  uint8_t keys[1] = {HID_KEY_V};
+  if(state) {
+    // control modifier (bit 4) + c
+    uint8_t modifier = (1 << 4);
+    uint8_t keys[1] = {HID_KEY_V};
 
-  // send report: id 0
-  usb_hid.keyboardReport(0x00, modifier, keys);
+    // send report: id 0
+    usb_hid.keyboardReport(0x00, modifier, keys);
+  }
 }
