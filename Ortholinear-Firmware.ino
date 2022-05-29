@@ -24,6 +24,7 @@ void init_pins(void);
 uint16_t read_columns(uint8_t rowIndex);
 uint8_t read_keys(void);
 void send_keys(void);
+void release_keys(void);
 void print_keys(void);
 
 // keyboard led functions
@@ -301,6 +302,16 @@ void send_keys() {
       }
     }
   }
+}
+
+
+void release_keys() {
+
+  // send modifiers message (optional - control stick)
+  usb_hid.keyboardReport(0x00, 0x00, NULL);
+
+  // send relese usb message
+  usb_hid.keyboardRelease(0x00);
 }
 
 
