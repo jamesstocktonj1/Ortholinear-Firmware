@@ -327,7 +327,7 @@ void send_keys() {
 
           // default then add key value to send array
           default:
-            if(buttonState) sendKeys[sendKeysPos++] = buttonCode;
+            if(buttonState) sendKeys[sendKeyPos++] = buttonCode;
         }
 
         // handle button release
