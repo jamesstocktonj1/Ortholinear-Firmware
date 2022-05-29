@@ -253,6 +253,10 @@ void send_keys() {
   uint8_t modifierState = 0x00;
   uint8_t shouldRelease = 0;
 
+  // key report to send
+  uint8_t sendKeys[6] = {0, };
+  uint8_t sendKeyPos = 0;
+
   // itterate through rows
   for(int i=0; i<4; i++) {
 
@@ -275,7 +279,7 @@ void send_keys() {
         uint8_t buttonState = (key_status[i] & (1 << j));
         switch(buttonCode) {
 
-          //user key press
+          // user key press
           case USR_KEY_0:
             USR_KEY_FUNC_0(buttonState);
             break;
@@ -294,13 +298,54 @@ void send_keys() {
           case USR_KEY_5:
             USR_KEY_FUNC_5(buttonState);
             break;
+
+          // handle modifier keys
+          case HID_KEY_CONTROL_LEFT:
+            if(buttonState) modifierState |= (1 << 0);
+            break;
+          case HID_KEY_CONTROL_RIGHT:
+            if(buttonState) modifierState |= (1 << 4);
+            break;
+          case HID_KEY_SHIFT_LEFT:
+            if(buttonState) modifierState |= (1 << 1);
+            break;
+          case HID_KEY_SHIFT_RIGHT:
+            if(buttonState) modifierState |= (1 << 5);
+            break;
+          case HID_KEY_ALT_LEFT:
+            if(buttonState) modifierState |= (1 << 2);
+            break;
+          case HID_KEY_ALT_RIGHT:
+            if(buttonState) modifierState |= (1 << 6);
+            break;
+          case HID_KEY_GUI_LEFT:
+            if(buttonState) modifierState |= (1 << 3);
+            break;
+          case HID_KEY_GUI_RIGHT:
+            if(buttonState) modifierState |= (1 << 7);
+            break;
+
+          // default then add key value to send array
+          default:
+            if(buttonState) sendKeys[sendKeysPos++] = buttonCode;
         }
 
+        // handle button release
         if(!buttonState) {
-          release_keys();
+          shouldRelease = 1;
+        }
+        
+        // send key report if item added to array or modifier change
+        if((sendKeyPos != 0) || modifierState) {
+          usb_hid.keyboardReport(0, modifierState, sendKeys);
         }
       }
     }
+  }
+
+  // handle button release
+  if(shouldRelease) {
+    release_keys();
   }
 }
 
