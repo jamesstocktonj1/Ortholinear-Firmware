@@ -4,7 +4,7 @@
 
 #include "Adafruit_TinyUSB.h"
 
-void null_function(uint8_t state) {}
+void null_function(uint16_t state) {}
 
 
 // user key definitions (used in button array)

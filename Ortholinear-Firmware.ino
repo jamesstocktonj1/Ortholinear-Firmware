@@ -42,8 +42,8 @@ uint16_t led_state[4] = {0, };
 
 
 // keyboard special key functions
-void copy_func(uint8_t state);
-void paste_func(uint8_t state);
+void copy_func(uint16_t state);
+void paste_func(uint16_t state);
 
 
 // core 0 functions
@@ -392,7 +392,7 @@ void set_led_states() {
 
 
 
-void copy_func(uint8_t state) {
+void copy_func(uint16_t state) {
   digitalWrite(LED_BUILTIN, HIGH);
 
   if(state) {
@@ -412,7 +412,7 @@ void copy_func(uint8_t state) {
   digitalWrite(LED_BUILTIN, LOW);
 }
 
-void paste_func(uint8_t state) {
+void paste_func(uint16_t state) {
 
   
   if(state) {
