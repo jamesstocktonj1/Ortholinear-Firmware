@@ -23,6 +23,8 @@ Adafruit_USBD_HID usb_hid(desc_hid_report, sizeof(desc_hid_report), HID_ITF_PROT
 void init_pins(void);
 uint16_t read_columns(uint8_t rowIndex);
 uint8_t read_keys(void);
+void send_keys(void);
+void release_keys(void);
 void print_keys(void);
 
 // keyboard led functions
@@ -73,32 +75,12 @@ void setup() {
 
 void loop() {
 
-  /*
   if(read_keys()) {
-    print_keys();
+    //print_keys();
+    send_keys();
   }
   
-  delay(20);*/
-  USR_KEY_FUNC_0(1);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-
-  usb_hid.keyboardRelease(0x00);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(800);
-
-  delay(2000);
-
-
-  USR_KEY_FUNC_1(1);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-
-  usb_hid.keyboardRelease(0x00);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(800);
-
-  delay(2000);
+  delay(20);
 }
 
 // core 1 functions
@@ -106,11 +88,13 @@ void setup1() {}
 
 void loop1() {
 
+  /*
   if(writeLeds) {
     digitalWrite(LED_BUILTIN, HIGH);
     write_leds();
     digitalWrite(LED_BUILTIN, LOW);
   }
+  */
   /*
   copy_func();
   digitalWrite(LED_BUILTIN, HIGH);
@@ -201,7 +185,7 @@ uint8_t read_keys() {
     key_diff[i] = temp ^ key_previous[i];
 
     // set change flag
-    if(temp) {
+    if(key_diff[i]) {
       change = 1;
     }
 
@@ -246,6 +230,126 @@ void print_keys() {
   }
 }
 
+void send_keys() {
+
+  uint8_t modifierState = 0x00;
+  uint8_t shouldRelease = 0;
+
+  // key report to send
+  uint8_t sendKeys[6] = {0, };
+  uint8_t sendKeyPos = 0;
+
+  // itterate through rows
+  for(int i=0; i<4; i++) {
+
+    // itterate through columns
+    for(int j=0; j<12; j++) {
+
+      // check for key change
+      if(key_diff[i] & (1 << j)) {
+        
+        uint8_t buttonCode = primaryLayer[i][j];
+        uint16_t buttonState = (key_status[i] & (1 << j));
+
+        // log button press
+        Serial.print("Button ");
+        if(buttonState) {
+          Serial.print("Press");
+        }
+        else {
+          Serial.print("Release");
+        }
+        Serial.print(": ");
+        Serial.print(i);
+        Serial.print(", ");
+        Serial.print(j);
+        Serial.print("\n");
+        
+        switch(buttonCode) {
+
+          // user key press
+          case USR_KEY_0:
+            USR_KEY_FUNC_0(buttonState);
+            break;
+          case USR_KEY_1:
+            USR_KEY_FUNC_1(buttonState);
+            break;
+          case USR_KEY_2:
+            USR_KEY_FUNC_2(buttonState);
+            break;
+          case USR_KEY_3:
+            USR_KEY_FUNC_3(buttonState);
+            break;
+          case USR_KEY_4:
+            USR_KEY_FUNC_4(buttonState);
+            break;
+          case USR_KEY_5:
+            USR_KEY_FUNC_5(buttonState);
+            break;
+
+          // handle modifier keys
+          case HID_KEY_CONTROL_LEFT:
+            if(buttonState) modifierState |= (1 << 0);
+            break;
+          case HID_KEY_CONTROL_RIGHT:
+            if(buttonState) modifierState |= (1 << 4);
+            break;
+          case HID_KEY_SHIFT_LEFT:
+            if(buttonState) modifierState |= (1 << 1);
+            break;
+          case HID_KEY_SHIFT_RIGHT:
+            if(buttonState) modifierState |= (1 << 5);
+            break;
+          case HID_KEY_ALT_LEFT:
+            if(buttonState) modifierState |= (1 << 2);
+            break;
+          case HID_KEY_ALT_RIGHT:
+            if(buttonState) modifierState |= (1 << 6);
+            break;
+          case HID_KEY_GUI_LEFT:
+            if(buttonState) modifierState |= (1 << 3);
+            break;
+          case HID_KEY_GUI_RIGHT:
+            if(buttonState) modifierState |= (1 << 7);
+            break;
+
+          // default then add key value to send array
+          default:
+            if(buttonState) sendKeys[sendKeyPos++] = buttonCode;
+        }
+
+        // handle button release
+        if(!buttonState) {
+          shouldRelease = 1;
+          release_keys();
+        }
+      }
+    }
+  }
+  
+  // send key report if item added to array or modifier change
+  if((sendKeyPos != 0) || modifierState) {
+    usb_hid.keyboardReport(0, modifierState, sendKeys);
+  }
+
+  // handle button release
+  if(shouldRelease) {
+    release_keys();
+  }
+}
+
+
+void release_keys() {
+  uint8_t blank[6] = {0, };
+
+  // send modifiers message (optional - control stick)
+  usb_hid.keyboardReport(0, 0, blank);
+
+  // send relese usb message
+  usb_hid.keyboardRelease(0);
+}
+
+
 
 void write_leds() {
 
@@ -289,25 +393,42 @@ void set_led_states() {
 
 
 void copy_func(uint8_t state) {
+  digitalWrite(LED_BUILTIN, HIGH);
 
   if(state) {
-    // control modifier (bit 4) + c
-    uint8_t modifier = (1 << 4);
+    // right control modifier (bit 4) + c
+    //uint8_t modifier = (1 << 4);
+    // left control modifier (bit 0) + c
+    uint8_t modifier = (1 << 0);
     uint8_t keys[1] = {HID_KEY_C};
 
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
   }
+  else {
+
+    release_keys();  }
+
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
 void paste_func(uint8_t state) {
 
+  
   if(state) {
-    // control modifier (bit 4) + c
-    uint8_t modifier = (1 << 4);
+    // right control modifier (bit 4) + c
+    //uint8_t modifier = (1 << 4);
+    // left control modifier (bit 0) + c
+    uint8_t modifier = (1 << 0);
     uint8_t keys[1] = {HID_KEY_V};
 
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
+  else {
+
+    release_keys();
+    digitalWrite(LED_BUILTIN, LOW);
   }
 }
