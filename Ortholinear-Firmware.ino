@@ -303,6 +303,7 @@ void send_keys() {
           case HID_KEY_ALT_LEFT:
             if(buttonState) modifierState |= (1 << 2);
             break;
+            
           case HID_KEY_ALT_RIGHT:
             if(buttonState) modifierState |= (1 << 6);
             break;
@@ -321,7 +322,7 @@ void send_keys() {
         // handle button release
         if(!buttonState) {
           shouldRelease = 1;
-          release_keys();
+          //release_keys();
         }
       }
     }
@@ -407,7 +408,9 @@ void copy_func(uint16_t state) {
   }
   else {
 
-    release_keys();  }
+    //release_keys();
+    usb_hid.keyboardRelease(0);
+  }
 
   digitalWrite(LED_BUILTIN, LOW);
 }
@@ -428,7 +431,8 @@ void paste_func(uint16_t state) {
   }
   else {
 
-    release_keys();
+    //release_keys();
+    usb_hid.keyboardRelease(0);
     digitalWrite(LED_BUILTIN, LOW);
   }
 }
