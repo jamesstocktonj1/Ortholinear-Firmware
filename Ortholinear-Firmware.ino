@@ -249,7 +249,7 @@ void send_keys() {
       if(key_diff[i] & (1 << j)) {
         
         uint8_t buttonCode = primaryLayer[i][j];
-        uint8_t buttonState = (key_status[i] & (1 << j));
+        uint16_t buttonState = (key_status[i] & (1 << j));
 
         // log button press
         Serial.print("Button ");
@@ -407,8 +407,7 @@ void copy_func(uint8_t state) {
   }
   else {
 
-    release_keys();
-  }
+    release_keys();  }
 
   digitalWrite(LED_BUILTIN, LOW);
 }
@@ -421,7 +420,7 @@ void paste_func(uint8_t state) {
     //uint8_t modifier = (1 << 4);
     // left control modifier (bit 0) + c
     uint8_t modifier = (1 << 0);
-    uint8_t keys[1] = {HID_KEY_C};
+    uint8_t keys[1] = {HID_KEY_V};
 
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
