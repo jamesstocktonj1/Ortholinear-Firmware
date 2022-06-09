@@ -80,7 +80,7 @@ void loop() {
     send_keys();
   }
   
-  delay(20);
+  delay(10);
 }
 
 // core 1 functions
@@ -188,8 +188,8 @@ uint8_t read_keys() {
     if(key_diff[i]) {
       change = 1;
     }
-
-    delay(2);
+    
+    //delay(2);
   }
 
   // update led array
