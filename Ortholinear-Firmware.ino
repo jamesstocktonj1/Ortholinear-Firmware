@@ -24,7 +24,6 @@ void init_pins(void);
 uint16_t read_columns(uint8_t rowIndex);
 uint8_t read_keys(void);
 void send_keys(void);
-void release_keys(void);
 void print_keys(void);
 
 // keyboard led functions
@@ -250,7 +249,8 @@ void send_keys() {
     // itterate through columns
     for(int j=0; j<12; j++) {
 
-      uint8_t buttonState = key_status[i][j];
+      uint8_t buttonCode = primaryLayer[i][j];
+      uint16_t buttonState = key_status[i] & (1 << j);
 
       // log key press on button change
       if(key_diff[i] & (1 << j)) {
@@ -331,22 +331,8 @@ void send_keys() {
   }
 
   // send keyboard report
-  usb_hid.keyboardReport(0, modifierState, send_keys);
+  usb_hid.keyboardReport(0, modifierState, sendKeys);
 }
-
-
-
-
-void release_keys() {
-  uint8_t blank[6] = {0, };
-
-  // send modifiers message (optional - control stick)
-  usb_hid.keyboardReport(0, 0, blank);
-
-  // send relese usb message
-  usb_hid.keyboardRelease(0);
-}
-
 
 
 void write_leds() {
@@ -391,45 +377,25 @@ void set_led_states() {
 
 
 void copy_func(uint16_t state) {
-  digitalWrite(LED_BUILTIN, HIGH);
 
   if(state) {
-    // right control modifier (bit 4) + c
-    //uint8_t modifier = (1 << 4);
     // left control modifier (bit 0) + c
     uint8_t modifier = (1 << 0);
     uint8_t keys[1] = {HID_KEY_C};
-
+  
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
   }
-  else {
-
-    //release_keys();
-    usb_hid.keyboardRelease(0);
-  }
-
-  digitalWrite(LED_BUILTIN, LOW);
 }
 
 void paste_func(uint16_t state) {
 
-  
   if(state) {
-    // right control modifier (bit 4) + c
-    //uint8_t modifier = (1 << 4);
-    // left control modifier (bit 0) + c
+    // left control modifier (bit 0) + v
     uint8_t modifier = (1 << 0);
     uint8_t keys[1] = {HID_KEY_V};
-
+  
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
-    digitalWrite(LED_BUILTIN, HIGH);
-  }
-  else {
-
-    //release_keys();
-    usb_hid.keyboardRelease(0);
-    digitalWrite(LED_BUILTIN, LOW);
   }
 }
