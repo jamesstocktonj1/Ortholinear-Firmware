@@ -33,6 +33,7 @@ void write_leds(void);
 // keyboard special key functions
 void copy_func(uint16_t state);
 void paste_func(uint16_t state);
+void layer_select(uint16_t state);
 
 
 // key status arrays
@@ -40,9 +41,7 @@ uint16_t key_status[4] = {0, };
 uint16_t key_previous[4] = {0, };
 uint16_t key_diff[4] = {0, };
 
-// usb key status array
-uint8_t usb_keys[6] = {0, };
-uint8_t usb_keys_pos = 0;
+uint8_t curLayer = 0;
 
 // led status arrays
 bool writeLeds = false;
@@ -242,6 +241,8 @@ void send_keys() {
   uint8_t sendKeys[6] = {0, };
   uint8_t sendKeyPos = 0;
 
+  uint8_t curLayer = key_status[3] & (1 << 6);
+
 
   // itterate through rows
   for(int i=0; i<4; i++) {
@@ -249,8 +250,17 @@ void send_keys() {
     // itterate through columns
     for(int j=0; j<12; j++) {
 
-      uint8_t buttonCode = primaryLayer[i][j];
+      uint8_t buttonCode = 0;
       uint16_t buttonState = key_status[i] & (1 << j);
+
+      // layer select
+      if(curLayer) {
+        buttonCode = secondaryLayer[i][j];
+      }
+      else {
+        buttonCode = primaryLayer[i][j];
+      }
+      
 
       // log key press on button change
       if(key_diff[i] & (1 << j)) {
@@ -401,5 +411,17 @@ void paste_func(uint16_t state) {
     usb_hid.keyboardReport(0x00, modifier, keys);
 
     delay(2);
+  }
+}
+
+
+void layer_select(uint16_t state) {
+
+  // if button is pressed then select second layer
+  if(state) {
+    curLayer = 1;
+  }
+  else {
+    curLayer = 0;
   }
 }
