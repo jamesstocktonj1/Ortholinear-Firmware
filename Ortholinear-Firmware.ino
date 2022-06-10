@@ -260,8 +260,7 @@ void send_keys() {
       else {
         buttonCode = primaryLayer[i][j];
       }
-      
-
+  
       // log key press on button change
       if(key_diff[i] & (1 << j)) {
 
