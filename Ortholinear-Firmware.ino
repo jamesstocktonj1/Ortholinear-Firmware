@@ -297,34 +297,34 @@ void send_keys() {
 
           // handle modifier keys
           case HID_KEY_CONTROL_LEFT:
-            if(buttonState) modifierState |= (1 << 0);
+            modifierState |= (1 << 0);
             break;
           case HID_KEY_CONTROL_RIGHT:
-            if(buttonState) modifierState |= (1 << 4);
+            modifierState |= (1 << 4);
             break;
           case HID_KEY_SHIFT_LEFT:
-            if(buttonState) modifierState |= (1 << 1);
+            modifierState |= (1 << 1);
             break;
           case HID_KEY_SHIFT_RIGHT:
-            if(buttonState) modifierState |= (1 << 5);
+            modifierState |= (1 << 5);
             break;
           case HID_KEY_ALT_LEFT:
-            if(buttonState) modifierState |= (1 << 2);
+            modifierState |= (1 << 2);
             break;
             
           case HID_KEY_ALT_RIGHT:
-            if(buttonState) modifierState |= (1 << 6);
+            modifierState |= (1 << 6);
             break;
           case HID_KEY_GUI_LEFT:
-            if(buttonState) modifierState |= (1 << 3);
+            modifierState |= (1 << 3);
             break;
           case HID_KEY_GUI_RIGHT:
-            if(buttonState) modifierState |= (1 << 7);
+            modifierState |= (1 << 7);
             break;
 
           // default then add key value to send array
           default:
-            if(buttonState) sendKeys[sendKeyPos++] = buttonCode;
+            sendKeys[sendKeyPos++] = buttonCode;
         }
       }
     }
