@@ -31,19 +31,24 @@ void print_keys(void);
 void set_led_states(void);
 void write_leds(void);
 
+// keyboard special key functions
+void copy_func(uint16_t state);
+void paste_func(uint16_t state);
+
+
 // key status arrays
 uint16_t key_status[4] = {0, };
 uint16_t key_previous[4] = {0, };
 uint16_t key_diff[4] = {0, };
 
+// usb key status array
+uint8_t usb_keys[6] = {0, };
+uint8_t usb_keys_pos = 0;
+
 // led status arrays
 bool writeLeds = false;
 uint16_t led_state[4] = {0, };
 
-
-// keyboard special key functions
-void copy_func(uint16_t state);
-void paste_func(uint16_t state);
 
 
 // core 0 functions
