@@ -235,14 +235,14 @@ void print_keys() {
   }
 }
 
+
 void send_keys() {
 
-  uint8_t modifierState = 0x00;
-  uint8_t shouldRelease = 0;
-
   // key report to send
+  uint8_t modifierState = 0x00;
   uint8_t sendKeys[6] = {0, };
   uint8_t sendKeyPos = 0;
+
 
   // itterate through rows
   for(int i=0; i<4; i++) {
@@ -250,11 +250,8 @@ void send_keys() {
     // itterate through columns
     for(int j=0; j<12; j++) {
 
-      // check for key change
+      // log key press on button change
       if(key_diff[i] & (1 << j)) {
-        
-        uint8_t buttonCode = primaryLayer[i][j];
-        uint16_t buttonState = (key_status[i] & (1 << j));
 
         // log button press
         Serial.print("Button ");
@@ -269,7 +266,11 @@ void send_keys() {
         Serial.print(", ");
         Serial.print(j);
         Serial.print("\n");
-        
+      }
+
+      // add key to report if pressed (not only on change)
+      if(key_status[i][j]) {
+
         switch(buttonCode) {
 
           // user key press
@@ -323,26 +324,15 @@ void send_keys() {
           default:
             if(buttonState) sendKeys[sendKeyPos++] = buttonCode;
         }
-
-        // handle button release
-        if(!buttonState) {
-          shouldRelease = 1;
-          //release_keys();
-        }
       }
     }
   }
-  
-  // send key report if item added to array or modifier change
-  if((sendKeyPos != 0) || modifierState) {
-    usb_hid.keyboardReport(0, modifierState, sendKeys);
-  }
 
-  // handle button release
-  if(shouldRelease) {
-    release_keys();
-  }
+  // send keyboard report
+  usb_hid.keyboardReport(0, modifierState, send_keys);
 }
+
+
 
 
 void release_keys() {
