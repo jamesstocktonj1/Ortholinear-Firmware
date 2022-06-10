@@ -385,6 +385,8 @@ void copy_func(uint16_t state) {
   
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
+
+    delay(2);
   }
 }
 
@@ -397,5 +399,7 @@ void paste_func(uint16_t state) {
   
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
+
+    delay(2);
   }
 }
