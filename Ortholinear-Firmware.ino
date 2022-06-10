@@ -250,6 +250,8 @@ void send_keys() {
     // itterate through columns
     for(int j=0; j<12; j++) {
 
+      uint8_t buttonState = key_status[i][j];
+
       // log key press on button change
       if(key_diff[i] & (1 << j)) {
 
@@ -269,7 +271,7 @@ void send_keys() {
       }
 
       // add key to report if pressed (not only on change)
-      if(key_status[i][j]) {
+      if(buttonState) {
 
         switch(buttonCode) {
 
