@@ -279,8 +279,8 @@ void send_keys() {
         Serial.print("\n");
       }
 
-      // add key to report if pressed (not only on change)
-      if(buttonState) {
+      // handle user key (on both press and release)
+      if(key_diff[i] & (1 << j)) {
 
         switch(buttonCode) {
 
@@ -303,6 +303,21 @@ void send_keys() {
           case USR_KEY_5:
             USR_KEY_FUNC_5(buttonState);
             break;
+        }
+      }
+
+      // add key to report (only on press)
+      if(buttonState) {
+
+        switch(buttonCode) {
+
+          // user key press (do nothing, handled in previous block)
+          case USR_KEY_0: break;
+          case USR_KEY_1: break;
+          case USR_KEY_2: break;
+          case USR_KEY_3: break;
+          case USR_KEY_4: break;
+          case USR_KEY_5: break;
 
           // handle modifier keys
           case HID_KEY_CONTROL_LEFT:
