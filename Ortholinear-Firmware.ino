@@ -126,18 +126,18 @@ void init_pins() {
 
   pinMode(LED_BUILTIN, OUTPUT);
 
-  // iterate through rows
+  // itterate through rows
   for(int i=0; i<4; i++) {
     pinMode(rows[i], OUTPUT);
     digitalWrite(rows[i], HIGH);
   }
 
-  // iterate through button columns
+  // itterate through button columns
   for(int j=0; j<12; j++) {
     pinMode(button_columns[j], INPUT_PULLUP);
   }
 
-  // iterate through led columns
+  // itterate through led columns
   for(int k=0; k<10; k++) {
     pinMode(led_columns[k], OUTPUT);
     pinMode(led_columns[k], LOW);
@@ -153,7 +153,7 @@ uint16_t read_column(uint8_t rowIndex) {
     digitalWrite(rows[i], i!=rowIndex);
   }
 
-  // iterate through columns
+  // itterate through columns
   for(int j=0; j<12; j++) {
 
     // read value and add to status
@@ -176,7 +176,7 @@ uint8_t read_keys() {
   uint16_t temp;
   uint8_t change = 0;
 
-  // iterate through rows
+  // itterate through rows
   for(int i=0; i<4; i++) {
     
     // set previous key value
@@ -203,10 +203,10 @@ uint8_t read_keys() {
 
 void print_keys() {
 
-  // iterate through rows
+  // itterate through rows
   for(int i=0; i<4; i++) {
 
-    // iterate through columns
+    // itterate through columns
     for(int j=0; j<12; j++) {
 
       if(key_status[i] & key_diff[i] & (1 << j)) {
@@ -244,10 +244,10 @@ void send_keys() {
   uint8_t curLayer = key_status[3] & (1 << 6);
 
 
-  // iterate through rows
+  // itterate through rows
   for(int i=0; i<4; i++) {
 
-    // iterate through columns
+    // itterate through columns
     for(int j=0; j<12; j++) {
 
       uint8_t buttonCode = 0;
@@ -361,7 +361,7 @@ void send_keys() {
 
 void write_leds() {
 
-  // iterate through rows
+  // itterate through rows
   for(int i=0; i<4; i++) {
 
     // set row values (all 1 except rowIndex)
@@ -369,7 +369,7 @@ void write_leds() {
       digitalWrite(rows[k], k!=i);
     }
 
-    // iterate through columns
+    // itterate through columns
     for(int j=0; j<10; j++) {
 
       digitalWrite(led_columns[i], led_state[i] & (1 << j));
@@ -391,7 +391,7 @@ void write_leds() {
 
 void set_led_states() {
 
-  // iterate through rows
+  // itterate through rows
   for(int i=0; i<4; i++) {
 
     led_state[i] = key_status[i];
@@ -403,28 +403,42 @@ void set_led_states() {
 void copy_func(uint16_t state) {
 
   if(state) {
+    
+    digitalWrite(LED_BUILTIN, HIGH);
+    
     // left control modifier (bit 0) + c
     uint8_t modifier = (1 << 0);
-    uint8_t keys[1] = {HID_KEY_C};
+    uint8_t keys[6] = {HID_KEY_C, 0, };
   
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
 
     delay(2);
   }
+  else {
+    
+    digitalWrite(LED_BUILTIN, LOW);
+  }
 }
 
 void paste_func(uint16_t state) {
 
   if(state) {
+    
+    digitalWrite(LED_BUILTIN, HIGH);
+    
     // left control modifier (bit 0) + v
     uint8_t modifier = (1 << 0);
-    uint8_t keys[1] = {HID_KEY_V};
+    uint8_t keys[6] = {HID_KEY_V, 0, };
   
     // send report: id 0
     usb_hid.keyboardReport(0x00, modifier, keys);
 
     delay(2);
+  }
+  else {
+    
+    digitalWrite(LED_BUILTIN, LOW);
   }
 }
 
