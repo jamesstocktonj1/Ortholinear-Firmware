@@ -84,6 +84,8 @@ void loop() {
   }
   
   delay(10);
+
+  write_leds();
 }
 
 // core 1 functions
@@ -91,34 +93,6 @@ void setup1() {}
 
 void loop1() {
 
-  /*
-  if(writeLeds) {
-    digitalWrite(LED_BUILTIN, HIGH);
-    write_leds();
-    digitalWrite(LED_BUILTIN, LOW);
-  }
-  */
-  /*
-  copy_func();
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-
-  usb_hid.keyboardRelease(0x00);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(800);
-
-  delay(2000);
-
-
-  paste_func();
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-
-  usb_hid.keyboardRelease(0x00);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(800);
-
-  delay(2000);*/
 }
 
 
@@ -140,7 +114,7 @@ void init_pins() {
   // itterate through led columns
   for(int k=0; k<10; k++) {
     pinMode(led_columns[k], OUTPUT);
-    pinMode(led_columns[k], LOW);
+    digitalWrite(led_columns[k], LOW);
   }
 }
 
@@ -372,7 +346,7 @@ void write_leds() {
     // itterate through columns
     for(int j=0; j<10; j++) {
 
-      digitalWrite(led_columns[i], led_state[i] & (1 << j));
+      digitalWrite(led_columns[j], key_status[i] & (1 << (j + 1)));
     }
 
     delay(LED_WAIT_TIME);
