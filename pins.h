@@ -4,7 +4,7 @@
 
 
 // multiplexing timings
-#define LED_WAIT_TIME 10
+#define LED_WAIT_TIME 4
 
 
 // multiplexing rows
