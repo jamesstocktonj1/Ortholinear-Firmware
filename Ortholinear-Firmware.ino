@@ -82,8 +82,6 @@ void loop() {
     //print_keys();
     send_keys();
   }
-  
-  delay(10);
 
   write_leds();
 }
